@@ -11,4 +11,5 @@ class EnrollmentCreate(EnrollmentBase):
 class EnrollmentStatus(BaseModel):
     id: str
     status: str
-    message: str | None = None 
+    message: str | None = None
+    age_group_id: str | None = None 
