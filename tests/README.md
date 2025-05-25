@@ -121,9 +121,50 @@ pytest tests/ -x
 
 - **`api_client`**: Cliente HTTP para testar a API
 - **`mongo_client`**: Cliente MongoDB para verificações diretas
-- **`clean_database`**: Limpa o banco antes/depois de cada teste
+- **`clean_database`**: Limpa o banco e fila RabbitMQ antes/depois de cada teste
 - **`sample_age_groups`**: Cria age groups de exemplo
 - **`valid_enrollment_data`**: Dados válidos para enrollment
+
+### Utilitários de Limpeza
+
+#### Função `clean_db()`
+
+A função `clean_db()` está disponível em `tests/conftest.py` e pode ser usada para limpar completamente o sistema:
+
+```python
+from tests.conftest import clean_db
+
+# Limpa MongoDB e RabbitMQ
+clean_db()
+```
+
+#### Script de Limpeza
+
+Para limpar o sistema via linha de comando:
+
+```bash
+# Limpa completamente o sistema
+python clean_system.py
+```
+
+Este script:
+
+- Remove todos os enrollments e age groups do MongoDB
+- Purga todas as mensagens da fila RabbitMQ
+- Evita que o worker processe mensagens órfãs de testes antigos
+
+#### Fixture `clean_database`
+
+A fixture `clean_database` é executada automaticamente em testes que a usam:
+
+```python
+def test_something(api_client, clean_database):
+    # Banco e fila estão limpos antes do teste
+    # ... código do teste ...
+    # Banco e fila são limpos após o teste
+```
+
+**Importante**: Use `clean_database` em testes que criam dados no MongoDB ou RabbitMQ para garantir isolamento.
 
 ### Variáveis de Ambiente
 

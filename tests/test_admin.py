@@ -1,13 +1,15 @@
 import pytest
-from tests.conftest import TestClient
+from tests.conftest import APITestClient, create_basic_auth_header
 
 
+@pytest.mark.admin
 class TestAdminEndpoints:
     """Testes para endpoints administrativos"""
 
-    def test_list_users_as_admin(self, admin_client: TestClient):
+    def test_list_users_as_admin(self, api_client: APITestClient):
         """Testa listagem de usuários como admin"""
-        response = admin_client.get("/admin/users")
+        auth_header = create_basic_auth_header("admin", "secret123")
+        response = api_client.client.get("/admin/users", headers={"Authorization": auth_header})
         
         assert response.status_code == 200
         users = response.json()
@@ -22,35 +24,39 @@ class TestAdminEndpoints:
             # Verifica que a senha não está exposta
             assert "password" not in user
 
-    def test_list_users_as_manager(self, manager_client: TestClient):
+    def test_list_users_as_manager(self, api_client: APITestClient):
         """Testa listagem de usuários como manager (também admin)"""
-        response = manager_client.get("/admin/users")
+        auth_header = create_basic_auth_header("manager", "manager789")
+        response = api_client.client.get("/admin/users", headers={"Authorization": auth_header})
         
         assert response.status_code == 200
         users = response.json()
         assert len(users) >= 4
 
-    def test_list_users_as_regular_user_forbidden(self, user_client: TestClient):
+    def test_list_users_as_regular_user_forbidden(self, api_client: APITestClient):
         """Testa que usuário comum não pode listar usuários"""
-        response = user_client.get("/admin/users")
+        auth_header = create_basic_auth_header("config", "config123")
+        response = api_client.client.get("/admin/users", headers={"Authorization": auth_header})
         
         assert response.status_code == 403
 
-    def test_list_users_as_operator_forbidden(self, operator_client: TestClient):
+    def test_list_users_as_operator_forbidden(self, api_client: APITestClient):
         """Testa que operador não pode listar usuários"""
-        response = operator_client.get("/admin/users")
+        auth_header = create_basic_auth_header("operator", "operator456")
+        response = api_client.client.get("/admin/users", headers={"Authorization": auth_header})
         
         assert response.status_code == 403
 
-    def test_list_users_unauthenticated(self, unauthenticated_client: TestClient):
+    def test_list_users_unauthenticated(self, api_client: APITestClient):
         """Testa que endpoint requer autenticação"""
-        response = unauthenticated_client.get("/admin/users")
+        response = api_client.client.get("/admin/users")
         
         assert response.status_code == 401
 
-    def test_get_users_info_as_admin(self, admin_client: TestClient):
+    def test_get_users_info_as_admin(self, api_client: APITestClient):
         """Testa informações detalhadas dos usuários como admin"""
-        response = admin_client.get("/admin/users/info")
+        auth_header = create_basic_auth_header("admin", "secret123")
+        response = api_client.client.get("/admin/users/info", headers={"Authorization": auth_header})
         
         assert response.status_code == 200
         data = response.json()
@@ -63,15 +69,17 @@ class TestAdminEndpoints:
         assert data["total_users"] >= 4
         assert data["source"] in ["file", "environment_variables"]
 
-    def test_get_users_info_forbidden_for_regular_user(self, user_client: TestClient):
+    def test_get_users_info_forbidden_for_regular_user(self, api_client: APITestClient):
         """Testa que usuário comum não pode ver informações detalhadas"""
-        response = user_client.get("/admin/users/info")
+        auth_header = create_basic_auth_header("config", "config123")
+        response = api_client.client.get("/admin/users/info", headers={"Authorization": auth_header})
         
         assert response.status_code == 403
 
-    def test_reload_users_as_admin(self, admin_client: TestClient):
+    def test_reload_users_as_admin(self, api_client: APITestClient):
         """Testa recarga de usuários como admin"""
-        response = admin_client.post("/admin/users/reload")
+        auth_header = create_basic_auth_header("admin", "secret123")
+        response = api_client.client.post("/admin/users/reload", headers={"Authorization": auth_header})
         
         # Pode ser sucesso (200) ou erro (500) dependendo se o arquivo existe
         assert response.status_code in [200, 500]
@@ -82,15 +90,17 @@ class TestAdminEndpoints:
             assert "users" in data
             assert "total_users" in data
 
-    def test_reload_users_forbidden_for_regular_user(self, user_client: TestClient):
+    def test_reload_users_forbidden_for_regular_user(self, api_client: APITestClient):
         """Testa que usuário comum não pode recarregar usuários"""
-        response = user_client.post("/admin/users/reload")
+        auth_header = create_basic_auth_header("config", "config123")
+        response = api_client.client.post("/admin/users/reload", headers={"Authorization": auth_header})
         
         assert response.status_code == 403
 
-    def test_get_auth_status_as_admin(self, admin_client: TestClient):
+    def test_get_auth_status_as_admin(self, api_client: APITestClient):
         """Testa status do sistema de autenticação como admin"""
-        response = admin_client.get("/admin/system/auth-status")
+        auth_header = create_basic_auth_header("admin", "secret123")
+        response = api_client.client.get("/admin/system/auth-status", headers={"Authorization": auth_header})
         
         assert response.status_code == 200
         data = response.json()
@@ -109,23 +119,26 @@ class TestAdminEndpoints:
         assert data["current_user"]["username"] == "admin"
         assert data["current_user"]["role"] == "admin"
 
-    def test_get_auth_status_as_manager(self, manager_client: TestClient):
+    def test_get_auth_status_as_manager(self, api_client: APITestClient):
         """Testa status do sistema como manager"""
-        response = manager_client.get("/admin/system/auth-status")
+        auth_header = create_basic_auth_header("manager", "manager789")
+        response = api_client.client.get("/admin/system/auth-status", headers={"Authorization": auth_header})
         
         assert response.status_code == 200
         data = response.json()
         assert data["current_user"]["username"] == "manager"
         assert data["current_user"]["role"] == "admin"
 
-    def test_get_auth_status_forbidden_for_regular_user(self, user_client: TestClient):
+    def test_get_auth_status_forbidden_for_regular_user(self, api_client: APITestClient):
         """Testa que usuário comum não pode ver status do sistema"""
-        response = user_client.get("/admin/system/auth-status")
+        auth_header = create_basic_auth_header("config", "config123")
+        response = api_client.client.get("/admin/system/auth-status", headers={"Authorization": auth_header})
         
         assert response.status_code == 403
 
-    def test_admin_endpoints_require_admin_role(self, operator_client: TestClient):
+    def test_admin_endpoints_require_admin_role(self, api_client: APITestClient):
         """Testa que todos os endpoints admin requerem role admin"""
+        auth_header = create_basic_auth_header("operator", "operator456")
         admin_endpoints = [
             "/admin/users",
             "/admin/users/info",
@@ -133,16 +146,17 @@ class TestAdminEndpoints:
         ]
         
         for endpoint in admin_endpoints:
-            response = operator_client.get(endpoint)
+            response = api_client.client.get(endpoint, headers={"Authorization": auth_header})
             assert response.status_code == 403, f"Endpoint {endpoint} deveria retornar 403"
         
         # Testa POST também
-        response = operator_client.post("/admin/users/reload")
+        response = api_client.client.post("/admin/users/reload", headers={"Authorization": auth_header})
         assert response.status_code == 403
 
-    def test_verify_user_roles_in_listing(self, admin_client: TestClient):
+    def test_verify_user_roles_in_listing(self, api_client: APITestClient):
         """Testa que os usuários têm os roles corretos"""
-        response = admin_client.get("/admin/users")
+        auth_header = create_basic_auth_header("admin", "secret123")
+        response = api_client.client.get("/admin/users", headers={"Authorization": auth_header})
         assert response.status_code == 200
         
         users = response.json()
@@ -154,9 +168,10 @@ class TestAdminEndpoints:
         assert users_by_name["config"]["role"] == "user"
         assert users_by_name["operator"]["role"] == "user"
 
-    def test_verify_user_descriptions(self, admin_client: TestClient):
+    def test_verify_user_descriptions(self, api_client: APITestClient):
         """Testa que os usuários têm descrições"""
-        response = admin_client.get("/admin/users")
+        auth_header = create_basic_auth_header("admin", "secret123")
+        response = api_client.client.get("/admin/users", headers={"Authorization": auth_header})
         assert response.status_code == 200
         
         users = response.json()

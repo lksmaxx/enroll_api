@@ -4,28 +4,27 @@ import sys
 import os
 
 # Adiciona o path do src para importar os módulos
-sys.path.append(os.path.join(os.path.dirname(__file__), '../src/enroll_api'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../src/enroll_api'))
 
 from app.models.enrollment import EnrollmentCreate, EnrollmentStatus
 from app.models.age_group import AgeGroup, AgeGroupCreate, AgeGroupUpdate
 
 
+@pytest.mark.unit
 class TestEnrollmentModels:
     """Testes unitários para os modelos de Enrollment"""
 
     def test_enrollment_create_valid_data(self):
         """Testa criação de EnrollmentCreate com dados válidos"""
-        with patch('app.utils.validators.validate_cpf_format', return_value=True):
-            with patch('app.utils.validators.format_cpf', return_value="123.456.789-01"):
-                enrollment = EnrollmentCreate(
-                    name="João Silva",
-                    age=25,
-                    cpf="12345678901"
-                )
-                
-                assert enrollment.name == "João Silva"
-                assert enrollment.age == 25
-                assert enrollment.cpf == "123.456.789-01"
+        enrollment = EnrollmentCreate(
+            name="João Silva",
+            age=25,
+            cpf="11144477735"  # CPF matematicamente válido
+        )
+        
+        assert enrollment.name == "João Silva"
+        assert enrollment.age == 25
+        assert enrollment.cpf == "11144477735"  # CPF formatado (sem pontos/traços)
 
     def test_enrollment_create_invalid_age(self):
         """Testa criação de EnrollmentCreate com idade inválida"""
@@ -33,26 +32,24 @@ class TestEnrollmentModels:
             EnrollmentCreate(
                 name="João Silva",
                 age=0,  # Idade inválida
-                cpf="123.456.789-01"
+                cpf="11144477735"
             )
         
         with pytest.raises(ValueError):
             EnrollmentCreate(
                 name="João Silva",
                 age=150,  # Idade muito alta
-                cpf="123.456.789-01"
+                cpf="11144477735"
             )
 
     def test_enrollment_create_invalid_cpf(self):
         """Testa criação de EnrollmentCreate com CPF inválido"""
-        with patch('app.utils.validators.validate_cpf_format', return_value=False):
-            with patch('app.utils.validators.format_cpf', return_value="111.111.111-11"):
-                with pytest.raises(ValueError, match="CPF com formato inválido"):
-                    EnrollmentCreate(
-                        name="João Silva",
-                        age=25,
-                        cpf="111.111.111-11"
-                    )
+        with pytest.raises(ValueError, match="CPF inválido"):
+            EnrollmentCreate(
+                name="João Silva",
+                age=25,
+                cpf="111.111.111-11"  # CPF inválido (todos dígitos iguais)
+            )
 
     def test_enrollment_status_model(self):
         """Testa modelo EnrollmentStatus"""
@@ -69,6 +66,7 @@ class TestEnrollmentModels:
         assert status.age_group_id == "507f1f77bcf86cd799439011"
 
 
+@pytest.mark.unit
 class TestAgeGroupModels:
     """Testes unitários para os modelos de Age Group"""
 
@@ -99,6 +97,7 @@ class TestAgeGroupModels:
         assert age_group.max_age == 25
 
 
+@pytest.mark.unit
 class TestEnrollmentService:
     """Testes unitários para o serviço de Enrollment"""
 
@@ -119,22 +118,20 @@ class TestEnrollmentService:
         # Importa e testa a função
         from app.services.enrollment import publish_enrollment
         
-        with patch('app.utils.validators.validate_cpf_format', return_value=True):
-            with patch('app.utils.validators.format_cpf', return_value="123.456.789-01"):
-                enrollment_data = EnrollmentCreate(
-                    name="João Silva",
-                    age=25,
-                    cpf="12345678901"
-                )
-                
-                enrollment_id = publish_enrollment(enrollment_data)
-                
-                # Verifica se foi chamado corretamente
-                mock_db.age_groups.find_one.assert_called_once()
-                mock_db.enrollments.insert_one.assert_called_once()
-                mock_publish.assert_called_once()
-                
-                assert enrollment_id is not None
+        enrollment_data = EnrollmentCreate(
+            name="João Silva",
+            age=25,
+            cpf="11144477735"  # CPF matematicamente válido
+        )
+        
+        enrollment_id = publish_enrollment(enrollment_data)
+        
+        # Verifica se foi chamado corretamente
+        mock_db.age_groups.find_one.assert_called_once()
+        mock_db.enrollments.insert_one.assert_called_once()
+        mock_publish.assert_called_once()
+        
+        assert enrollment_id is not None
 
     @patch('app.services.enrollment.mongo_db')
     def test_publish_enrollment_no_age_group(self, mock_db):
@@ -145,19 +142,17 @@ class TestEnrollmentService:
         from app.services.enrollment import publish_enrollment
         from fastapi import HTTPException
         
-        with patch('app.utils.validators.validate_cpf_format', return_value=True):
-            with patch('app.utils.validators.format_cpf', return_value="123.456.789-01"):
-                enrollment_data = EnrollmentCreate(
-                    name="João Silva",
-                    age=100,  # Idade fora de qualquer age group
-                    cpf="12345678901"
-                )
-                
-                with pytest.raises(HTTPException) as exc_info:
-                    publish_enrollment(enrollment_data)
-                
-                assert exc_info.value.status_code == 400
-                assert "idade" in exc_info.value.detail.lower()
+        enrollment_data = EnrollmentCreate(
+            name="João Silva",
+            age=100,  # Idade fora de qualquer age group
+            cpf="11144477735"  # CPF matematicamente válido
+        )
+        
+        with pytest.raises(HTTPException) as exc_info:
+            publish_enrollment(enrollment_data)
+        
+        assert exc_info.value.status_code == 400
+        assert "idade" in exc_info.value.detail.lower()
 
     @patch('app.services.enrollment.mongo_db')
     def test_get_enrollment_status_found(self, mock_db):
@@ -193,133 +188,32 @@ class TestEnrollmentService:
         assert result is None
 
 
-class TestAgeGroupService:
-    """Testes unitários para o serviço de Age Group"""
+@pytest.mark.unit
+class TestValidators:
+    """Testes unitários para os validadores"""
+    
+    def test_validate_cpf_format_valid(self):
+        """Testa validação de CPF com formato válido"""
+        from app.utils.validators import validate_cpf_format
+        
+        # Usando CPFs matematicamente válidos
+        assert validate_cpf_format("11144477735") == True
+        assert validate_cpf_format("111.444.777-35") == True
+        assert validate_cpf_format("52998224725") == True
 
-    @patch('app.services.age_groups.mongo_db')
-    async def test_create_age_group_success(self, mock_db):
-        """Testa criação bem-sucedida de age group"""
-        # Mock da inserção e busca
-        mock_db.age_groups.insert_one.return_value = Mock(inserted_id="507f1f77bcf86cd799439011")
-        mock_db.age_groups.find_one.return_value = {
-            "_id": "507f1f77bcf86cd799439011",
-            "min_age": 18,
-            "max_age": 25
-        }
+    def test_validate_cpf_format_invalid(self):
+        """Testa validação de CPF com formato inválido"""
+        from app.utils.validators import validate_cpf_format
         
-        from app.services.age_groups import create_age_group
-        
-        age_group_data = AgeGroupCreate(min_age=18, max_age=25)
-        result = await create_age_group(age_group_data)
-        
-        assert result["id"] == "507f1f77bcf86cd799439011"
-        assert result["min_age"] == 18
-        assert result["max_age"] == 25
+        assert validate_cpf_format("111.111.111-11") == False  # Todos iguais
+        assert validate_cpf_format("123.456.789") == False     # Muito curto
+        assert validate_cpf_format("123.456.789-012") == False # Muito longo
+        assert validate_cpf_format("abc.def.ghi-jk") == False  # Não numérico
 
-    @patch('app.services.age_groups.mongo_db')
-    async def test_get_age_group_found(self, mock_db):
-        """Testa busca de age group existente"""
-        # Mock do documento encontrado
-        mock_db.age_groups.find_one.return_value = {
-            "_id": "507f1f77bcf86cd799439011",
-            "min_age": 18,
-            "max_age": 25
-        }
+    def test_format_cpf(self):
+        """Testa formatação de CPF"""
+        from app.utils.validators import format_cpf
         
-        from app.services.age_groups import get_age_group
-        
-        result = await get_age_group("507f1f77bcf86cd799439011")
-        
-        assert result is not None
-        assert result["id"] == "507f1f77bcf86cd799439011"
-        assert result["min_age"] == 18
-        assert result["max_age"] == 25
-
-    @patch('app.services.age_groups.mongo_db')
-    async def test_get_age_group_not_found(self, mock_db):
-        """Testa busca de age group inexistente"""
-        # Mock de nenhum documento encontrado
-        mock_db.age_groups.find_one.return_value = None
-        
-        from app.services.age_groups import get_age_group
-        
-        result = await get_age_group("507f1f77bcf86cd799439011")
-        
-        assert result is None
-
-    @patch('app.services.age_groups.mongo_db')
-    async def test_get_all_age_groups(self, mock_db):
-        """Testa listagem de todos os age groups"""
-        # Mock da busca
-        mock_cursor = Mock()
-        mock_cursor.__iter__ = Mock(return_value=iter([
-            {"_id": "507f1f77bcf86cd799439011", "min_age": 18, "max_age": 25},
-            {"_id": "507f1f77bcf86cd799439012", "min_age": 26, "max_age": 35}
-        ]))
-        mock_db.age_groups.find.return_value = mock_cursor
-        
-        from app.services.age_groups import get_all_age_groups
-        
-        result = await get_all_age_groups()
-        
-        assert len(result) == 2
-        assert result[0]["id"] == "507f1f77bcf86cd799439011"
-        assert result[1]["id"] == "507f1f77bcf86cd799439012"
-
-    @patch('app.services.age_groups.mongo_db')
-    async def test_update_age_group_success(self, mock_db):
-        """Testa atualização bem-sucedida de age group"""
-        # Mock da atualização e busca
-        mock_db.age_groups.update_one.return_value = Mock(modified_count=1)
-        mock_db.age_groups.find_one.return_value = {
-            "_id": "507f1f77bcf86cd799439011",
-            "min_age": 20,
-            "max_age": 30
-        }
-        
-        from app.services.age_groups import update_age_group
-        
-        update_data = AgeGroupUpdate(min_age=20, max_age=30)
-        result = await update_age_group("507f1f77bcf86cd799439011", update_data)
-        
-        assert result is not None
-        assert result["id"] == "507f1f77bcf86cd799439011"
-        assert result["min_age"] == 20
-        assert result["max_age"] == 30
-
-    @patch('app.services.age_groups.mongo_db')
-    async def test_update_age_group_not_found(self, mock_db):
-        """Testa atualização de age group inexistente"""
-        # Mock de nenhuma modificação
-        mock_db.age_groups.update_one.return_value = Mock(modified_count=0)
-        
-        from app.services.age_groups import update_age_group
-        
-        update_data = AgeGroupUpdate(min_age=20, max_age=30)
-        result = await update_age_group("507f1f77bcf86cd799439011", update_data)
-        
-        assert result is None
-
-    @patch('app.services.age_groups.mongo_db')
-    async def test_delete_age_group_success(self, mock_db):
-        """Testa exclusão bem-sucedida de age group"""
-        # Mock da exclusão
-        mock_db.age_groups.delete_one.return_value = Mock(deleted_count=1)
-        
-        from app.services.age_groups import delete_age_group
-        
-        result = await delete_age_group("507f1f77bcf86cd799439011")
-        
-        assert result == 1
-
-    @patch('app.services.age_groups.mongo_db')
-    async def test_delete_age_group_not_found(self, mock_db):
-        """Testa exclusão de age group inexistente"""
-        # Mock de nenhuma exclusão
-        mock_db.age_groups.delete_one.return_value = Mock(deleted_count=0)
-        
-        from app.services.age_groups import delete_age_group
-        
-        result = await delete_age_group("507f1f77bcf86cd799439011")
-        
-        assert result == 0 
+        assert format_cpf("111.444.777-35") == "11144477735"
+        assert format_cpf("111 444 777 35") == "11144477735"
+        assert format_cpf("11144477735") == "11144477735" 

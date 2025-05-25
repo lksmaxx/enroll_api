@@ -29,3 +29,15 @@ archive.zip
 # macOS
 .DS_Store
 .venv
+
+# Arquivos temporários de desenvolvimento
+test_*.py
+check_*.py
+debug_*.py
+temp_*.py
+*.tmp
+*.log
+
+# Arquivos de backup
+*.bak
+*.backup
