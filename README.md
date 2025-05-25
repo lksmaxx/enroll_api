@@ -1,18 +1,18 @@
 # 🎯 Enrollment API - Sistema de Inscrições
 
-Sistema completo de gerenciamento de inscrições com processamento assíncrono, desenvolvido seguindo rigorosamente a arquitetura especificada no diagrama de requisitos.
+Sistema completo de gerenciamento de inscrições com processamento assíncrono, desenvolvido com arquitetura moderna e escalável.
 
 ## 📋 Visão Geral
 
 Este projeto implementa um **sistema de enrollment** robusto que permite:
 
-- **Gerenciamento de grupos etários** (Age Groups)
+- **Gerenciamento de grupos etários** (Age Groups) com validação
 - **Processamento de inscrições** com validação de CPF
 - **Processamento assíncrono** via fila de mensagens
-- **Autenticação Basic Auth** com controle de acesso
-- **Arquitetura escalável** com Docker
+- **Autenticação Basic Auth** com controle de acesso por roles
+- **Arquitetura escalável** com Docker e microserviços
 
-## 🏗️ Arquitetura (Conforme Diagrama)
+## 🏗️ Arquitetura
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -36,17 +36,14 @@ Este projeto implementa um **sistema de enrollment** robusto que permite:
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-### ✅ Requisitos Implementados
+### 🎯 Componentes Principais
 
-- **FastAPI** com Age Groups API e Enrollment API
-- **Configuration User** e **Final User** como atores
-- **Document DB** (MongoDB) para persistência
-- **Enrollment Queue** (RabbitMQ) para processamento assíncrono
-- **Enrollment Processor** (worker Python standalone)
-- **Basic Auth** para autenticação
-- **Validação de CPF** obrigatória
-- **Processamento mínimo de 2s** garantido
-- **Fluxo completo**: Age groups → Enrollment → Queue → Processing → Status
+- **FastAPI** - API REST moderna com documentação automática
+- **MongoDB** - Banco de dados NoSQL para persistência flexível
+- **RabbitMQ** - Fila de mensagens para processamento assíncrono
+- **Python Worker** - Processador standalone para enrollments
+- **Basic Auth** - Sistema de autenticação simples e eficaz
+- **Docker** - Containerização para portabilidade e escalabilidade
 
 ## 🚀 Funcionalidades
 
@@ -77,20 +74,20 @@ Este projeto implementa um **sistema de enrollment** robusto que permite:
 
 - ✅ **Worker Python** standalone
 - ✅ **RabbitMQ** como fila de mensagens
-- ✅ **Processamento mínimo 2s** garantido
+- ✅ **Processamento com delay** configurável
 - ✅ **Atualização de status** automática
 
 ## 🛠️ Tecnologias Utilizadas
 
-| Componente    | Tecnologia | Justificativa                         |
-| ------------- | ---------- | ------------------------------------- |
-| **API**       | FastAPI    | Performance e documentação automática |
-| **Database**  | MongoDB    | Document DB conforme diagrama         |
-| **Queue**     | RabbitMQ   | Fila de mensagens robusta             |
-| **Worker**    | Python     | Processamento assíncrono              |
-| **Auth**      | Basic Auth | Simplicidade e conformidade           |
-| **Container** | Docker     | Portabilidade e isolamento            |
-| **Tests**     | Pytest     | Cobertura completa de testes          |
+| Componente    | Tecnologia | Justificativa                              |
+| ------------- | ---------- | ------------------------------------------ |
+| **API**       | FastAPI    | Performance e documentação automática      |
+| **Database**  | MongoDB    | Flexibilidade para dados não estruturados  |
+| **Queue**     | RabbitMQ   | Fila de mensagens robusta e confiável      |
+| **Worker**    | Python     | Processamento assíncrono eficiente         |
+| **Auth**      | Basic Auth | Simplicidade e facilidade de implementação |
+| **Container** | Docker     | Portabilidade e isolamento                 |
+| **Tests**     | Pytest     | Cobertura completa de testes               |
 
 ## 📁 Estrutura do Projeto
 
@@ -278,7 +275,7 @@ Final User             │          │          │          │
 1. **Validação**: CPF e idade contra age groups
 2. **Persistência**: Salva enrollment no MongoDB
 3. **Enfileiramento**: Publica na fila RabbitMQ
-4. **Processamento**: Worker processa com delay mínimo 2s
+4. **Processamento**: Worker processa com delay configurável
 5. **Atualização**: Status atualizado no MongoDB
 
 ## 🧪 Testes
@@ -441,33 +438,3 @@ docker exec -it enroll_api_mongo mongosh
 ---
 
 **🎉 Sistema pronto para produção com arquitetura robusta e escalável!**
-
-## ✅ Conformidade com Diagrama
-
-Este projeto implementa **100% dos requisitos** especificados no diagrama:
-
-- ✅ **FastAPI** com Age Groups API e Enrollment API
-- ✅ **Configuration User** e **Final User** como atores distintos
-- ✅ **Document DB** (MongoDB) para persistência
-- ✅ **Enrollment Queue** (RabbitMQ) para processamento assíncrono
-- ✅ **Enrollment Processor** como worker Python standalone
-- ✅ **Basic Auth** para autenticação (credenciais em arquivo estático)
-- ✅ **Validação de CPF** obrigatória
-- ✅ **Processamento mínimo 2s** garantido
-- ✅ **Fluxo completo** de enrollment funcional
-- ✅ **Testes integrados** obrigatórios implementados
-
-A conformidade com todos os requisitos é validada através da **suíte completa de testes** implementada. Execute os testes para verificar que todos os componentes estão funcionando corretamente:
-
-```bash
-# Testes rápidos para verificação básica
-python run_tests.py quick
-
-# Testes completos para validação total
-python run_tests.py full
-
-# Testes de integração para fluxo completo
-python run_tests.py integration
-```
-
-Os testes cobrem todos os aspectos da arquitetura e garantem que o sistema está funcionando conforme especificado no diagrama.
