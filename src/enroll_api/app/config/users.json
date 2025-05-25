@@ -1,0 +1,33 @@
+{
+  "users": [
+    {
+      "username": "admin",
+      "password": "secret123",
+      "role": "admin",
+      "description": "Usuário administrador com acesso total"
+    },
+    {
+      "username": "config",
+      "password": "config123",
+      "role": "user",
+      "description": "Usuário de configuração com acesso de leitura"
+    },
+    {
+      "username": "operator",
+      "password": "operator456",
+      "role": "user",
+      "description": "Usuário operador com acesso de leitura"
+    },
+    {
+      "username": "manager",
+      "password": "manager789",
+      "role": "admin",
+      "description": "Usuário gerente com acesso administrativo"
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2024-01-01",
+    "description": "Arquivo de configuração de usuários para autenticação Basic Auth"
+  }
+} 

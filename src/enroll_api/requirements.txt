@@ -1,4 +1,4 @@
-fastapi[standard]
+fastapi
 uvicorn
 pymongo
 pika
@@ -6,3 +6,5 @@ python-dotenv
 httpx
 python-multipart
 passlib[bcrypt]
+pytest
+pytest-asyncio

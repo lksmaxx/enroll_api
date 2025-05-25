@@ -19,6 +19,10 @@ services:
       - RABBITMQ_HOST=${RABBITMQ_HOST:-enroll_api_rabbitmq}
       - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
       - RABBITMQ_QUEUE=${RABBITMQ_QUEUE:-enrollment_queue}
+      # Basic Auth Configuration
+      - BASIC_AUTH_USERNAME=${BASIC_AUTH_USERNAME:-admin}
+      - BASIC_AUTH_PASSWORD=${BASIC_AUTH_PASSWORD:-secret123}
+      - BASIC_AUTH_USERS=${BASIC_AUTH_USERS:-admin:secret123,config:config123}
 
   mongo:
     container_name: enroll_api_mongo

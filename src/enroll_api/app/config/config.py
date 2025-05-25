@@ -15,6 +15,16 @@ class Config:
     RABBITMQ_USER = os.getenv("RABBITMQ_USER", "user")
     RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD", "password")
 
+    # Basic Auth Configuration
+    # Caminho para o arquivo de usuários (relativo ao diretório da aplicação)
+    USERS_FILE_PATH = os.getenv("USERS_FILE_PATH", "app/config/users.json")
+    
+    # Fallback para variáveis de ambiente (caso o arquivo não exista)
+    BASIC_AUTH_USERNAME = os.getenv("BASIC_AUTH_USERNAME", "admin")
+    BASIC_AUTH_PASSWORD = os.getenv("BASIC_AUTH_PASSWORD", "secret123")
+    
+    # Configuração para usuários múltiplos (formato: user1:pass1,user2:pass2)
+    BASIC_AUTH_USERS = os.getenv("BASIC_AUTH_USERS", "admin:secret123,config:config123")
 
 
 config = Config()
