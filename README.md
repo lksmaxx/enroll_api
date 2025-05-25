@@ -397,6 +397,32 @@ docker exec -it enroll_api_mongo mongosh
 - **API versioning** para compatibilidade
 - **Cache Redis** para performance
 
+### 💡 Melhorias Identificadas
+
+#### 🛡️ Validação de Age Groups
+
+- **Proteção contra exclusão**: Impedir deletar age groups com enrollments ativos
+- **Validação de atualização**: Verificar se mudanças não invalidam enrollments existentes
+- **Migração automática**: Realocar enrollments quando age groups são modificados
+
+#### ⚖️ Resolução de Colisões
+
+- **Detecção de sobreposição**: Validar que age groups não se sobreponham
+- **Estratégia de prioridade**: Definir qual age group usar quando há múltiplas opções
+- **Configuração flexível**: Permitir ou bloquear sobreposições conforme regra de negócio
+
+#### 🔄 Processamento Robusto
+
+- **Retry automático**: Reprocessar enrollments que falharam
+- **Dead letter queue**: Isolar enrollments com problemas persistentes
+- **Monitoramento de fila**: Alertas para filas congestionadas
+
+#### 📊 Observabilidade
+
+- **Logs estruturados**: Facilitar debugging e auditoria
+- **Métricas de negócio**: Acompanhar taxa de sucesso dos enrollments
+- **Health checks avançados**: Verificar dependências externas
+
 ## 📞 Suporte
 
 ### 🐛 Reportar Problemas
