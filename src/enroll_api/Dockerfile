@@ -6,7 +6,7 @@ COPY src/enroll_api/requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY src/enroll_api .
+COPY . .
 
 EXPOSE 8000
 

@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: src/enroll_api/Dockerfile
     ports:
-      - "8000:8000"
+      - "${ENROLL_API_PORT:-8000}:8000"
     volumes:
       - ./src/enroll_api:/app
     working_dir: /app
@@ -13,15 +13,48 @@ services:
       - PYTHONPATH=/app
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME:-admin}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD:-admin}
-      - MONGO_HOST=enroll_api_mongo
-      - MONGO_PORT=27017
-      - MONGO_DB=enroll_api
+      - MONGO_HOST=${MONGO_HOST:-enroll_api_mongo}
+      - MONGO_PORT=${MONGO_PORT:-27017}
+      - MONGO_DB=${MONGO_DB:-enroll_api}
+      - RABBITMQ_HOST=${RABBITMQ_HOST:-enroll_api_rabbitmq}
+      - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
+      - RABBITMQ_QUEUE=${RABBITMQ_QUEUE:-enrollment_queue}
 
   mongo:
     container_name: enroll_api_mongo
     image: mongo:latest
     ports:
-      - "27017:27017"
+      - "${MONGO_PORT:-27017}:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME:-admin}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD:-admin} 
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD:-admin}
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: enroll_api_rabbitmq
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-user}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-password}
+
+  worker:
+    build:
+      context: ./src/worker
+      dockerfile: Dockerfile
+    volumes:
+      - ./src/worker:/app
+    container_name: enroll_api_worker
+    environment:
+      - RABBITMQ_HOST=${RABBITMQ_HOST:-enroll_api_rabbitmq}
+      - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-user}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-password}
+      - RABBITMQ_QUEUE=${RABBITMQ_QUEUE:-enrollment_queue}
+      - MONGO_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-admin}@enroll_api_mongo:${MONGO_PORT:-27017}/
+      - MONGO_DB=${MONGO_DB:-enroll_api}
+    depends_on:
+      - mongo
+      - rabbitmq
+    restart: always

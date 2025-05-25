@@ -1,3 +1,8 @@
 fastapi[standard]
+uvicorn
 pymongo
-pydantic
+pika
+python-dotenv
+httpx
+python-multipart
+passlib[bcrypt]
