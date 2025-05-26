@@ -155,29 +155,133 @@ Este projeto implementa um **sistema de enrollment** robusto que permite:
 git clone <repository-url>
 cd enrollment-api
 
-# 2. Execute o ambiente completo
-docker compose up -d
+# 2. Setup automático (instala dependências + inicia Docker)
+make setup
 
 # 3. Verifique se está funcionando
 curl http://localhost:8000/
 ```
 
-### 🧪 Executando Testes
+### 🛠️ Opções de Instalação
+
+#### Opção 1: Makefile (Linux/macOS)
 
 ```bash
-# Instalar dependências de teste
-pip install pytest requests
+# Setup completo para desenvolvimento
+make dev-setup
 
-# Executar testes rápidos
+# Apenas dependências básicas
+make install
+
+# Executar testes
+make test-coverage
+```
+
+#### Opção 1b: PowerShell (Windows)
+
+```powershell
+# Instalar dependências
+.\make.ps1 install
+
+# Executar testes
+.\make.ps1 test
+
+# Executar testes com cobertura
+.\make.ps1 test-coverage
+
+# Ver todos os comandos
+.\make.ps1 help
+```
+
+#### Opção 2: Requirements.txt
+
+```bash
+# Dependências básicas (inclui coverage, pytest)
+pip install -r requirements.txt
+
+# Dependências de desenvolvimento (black, flake8, mypy)
+pip install -r requirements-dev.txt
+
+# Iniciar ambiente Docker
+docker compose up -d
+```
+
+#### Opção 3: Setup.py
+
+```bash
+# Instalação básica
+pip install -e .
+
+# Com dependências de desenvolvimento
+pip install -e ".[dev]"
+
+# Apenas dependências de teste
+pip install -e ".[test]"
+```
+
+### 🧪 Executando Testes
+
+#### Com Makefile (Linux/macOS)
+
+```bash
+# Testes rápidos
+make test
+
+# Testes com cobertura
+make test-coverage
+
+# Testes com relatório HTML
+make test-html
+
+# Testes por categoria
+make test-unit
+make test-auth
+make test-admin
+make test-integration
+```
+
+#### Com PowerShell (Windows)
+
+```powershell
+# Testes rápidos
+.\make.ps1 test
+
+# Testes com cobertura
+.\make.ps1 test-coverage
+
+# Testes com relatório HTML
+.\make.ps1 test-html
+
+# Iniciar/parar Docker
+.\make.ps1 docker-up
+.\make.ps1 docker-down
+```
+
+#### Com Script Python (Multiplataforma)
+
+```bash
+# Testes rápidos
 python run_tests.py quick
 
-# Executar testes completos
-python run_tests.py full
+# Testes completos com cobertura
+python run_tests.py coverage
 
-# Executar categoria específica
+# Categoria específica
 python run_tests.py auth
 python run_tests.py admin
 python run_tests.py integration
+```
+
+#### Com Pytest Direto
+
+```bash
+# Executar todos os testes
+pytest tests/ -v
+
+# Com cobertura
+coverage run -m pytest tests/
+coverage report --show-missing
+coverage html
 ```
 
 ## 🔐 Autenticação
@@ -367,10 +471,13 @@ open htmlcov/index.html   # macOS
 #### Pré-requisitos
 
 ```bash
-# Instalar dependências
-pip install pytest requests pymongo pika coverage
+# Instalar todas as dependências (inclui coverage)
+pip install -r requirements.txt
 
-# Iniciar ambiente
+# OU instalar dependências de desenvolvimento (opcional)
+pip install -r requirements-dev.txt
+
+# Iniciar ambiente Docker
 docker compose up -d
 ```
 

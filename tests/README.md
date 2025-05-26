@@ -85,8 +85,13 @@ tests/
    ```
 
 2. **Dependências instaladas**:
+
    ```bash
-   pip install pytest requests pymongo pika coverage
+   # Instalar todas as dependências (inclui coverage, pytest, etc.)
+   pip install -r requirements.txt
+
+   # OU para desenvolvimento completo
+   pip install -r requirements-dev.txt
    ```
 
 ### 🎯 Script de Testes Integrado

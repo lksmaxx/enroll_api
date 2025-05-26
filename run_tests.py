@@ -52,7 +52,8 @@ def check_environment() -> bool:
         subprocess.run(["pytest", "--version"], capture_output=True, check=True)
         print("✅ pytest instalado")
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print("❌ pytest não encontrado. Instale com: pip install pytest")
+        print("❌ pytest não encontrado")
+        print("   Instale as dependências com: pip install -r requirements.txt")
         return False
     
     # Verificar se coverage está instalado
@@ -60,12 +61,39 @@ def check_environment() -> bool:
         subprocess.run(["coverage", "--version"], capture_output=True, check=True)
         print("✅ coverage instalado")
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print("⚠️ coverage não encontrado. Instale com: pip install coverage")
-        print("   Testes continuarão sem cobertura de código")
+        print("❌ coverage não encontrado")
+        print("   Instale as dependências com: pip install -r requirements.txt")
+        return False
+    
+    # Verificar se requests está instalado
+    try:
+        import requests
+        print("✅ requests instalado")
+    except ImportError:
+        print("❌ requests não encontrado")
+        print("   Instale as dependências com: pip install -r requirements.txt")
+        return False
+    
+    # Verificar se pymongo está instalado
+    try:
+        import pymongo
+        print("✅ pymongo instalado")
+    except ImportError:
+        print("❌ pymongo não encontrado")
+        print("   Instale as dependências com: pip install -r requirements.txt")
+        return False
+    
+    # Verificar se pika está instalado
+    try:
+        import pika
+        print("✅ pika instalado")
+    except ImportError:
+        print("❌ pika não encontrado")
+        print("   Instale as dependências com: pip install -r requirements.txt")
+        return False
     
     # Verificar se a API está rodando
     try:
-        import requests
         response = requests.get(os.getenv("ENROLL_API_URL", "http://localhost:8000/"), timeout=5) 
         if response.status_code == 200:
             print("✅ API está rodando")
