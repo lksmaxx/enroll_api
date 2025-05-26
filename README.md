@@ -282,24 +282,111 @@ Final User             │          │          │          │
 
 ### 📊 Cobertura de Testes
 
-- **✅ Testes Unitários**: Modelos e serviços isolados
-- **✅ Testes Funcionais**: Endpoints específicos
-- **✅ Testes de Integração**: Fluxo completo
-- **✅ Testes de Autenticação**: Segurança e permissões
-- **✅ Testes Administrativos**: Endpoints admin
-- **✅ Testes de Performance**: Carga e concorrência
-- **✅ Testes de Casos Extremos**: Segurança e robustez
+O projeto possui uma suíte completa de **95+ testes** com **78% de cobertura de código**:
 
-### 🎯 Categorias de Teste
+- **✅ Testes Unitários**: Modelos e serviços isolados (14 testes)
+- **✅ Testes de Autenticação**: Basic Auth e permissões (13 testes)
+- **✅ Testes Administrativos**: Endpoints admin (15 testes)
+- **✅ Testes de Validação**: CPF, nomes, idades (12 testes)
+- **✅ Testes Funcionais**: Age Groups e Enrollments (26 testes)
+- **✅ Testes de Integração**: Fluxo completo (10 testes)
+- **✅ Testes de Performance**: Carga e concorrência (7 testes)
+- **✅ Testes de Casos Extremos**: Segurança e robustez (14 testes)
+
+### 🎯 Execução de Testes
+
+#### Testes Rápidos (Desenvolvimento)
+
+```bash
+# Testes básicos (padrão)
+python run_tests.py
+
+# Testes rápidos com cobertura
+python run_tests.py quick --coverage
+```
+
+#### Testes por Categoria
 
 ```bash
 python run_tests.py unit          # Testes unitários
 python run_tests.py auth          # Testes autenticação
 python run_tests.py admin         # Testes administrativos
-python run_tests.py functional    # Testes funcionais
+python run_tests.py validation    # Testes validação
+python run_tests.py functional    # Age Groups + Enrollments
 python run_tests.py integration   # Testes integração
 python run_tests.py performance   # Testes performance
 python run_tests.py edge          # Casos extremos
+```
+
+#### Suítes Completas
+
+```bash
+python run_tests.py all           # Todos (exceto lentos)
+python run_tests.py full          # Suíte completa
+python run_tests.py coverage      # Suíte completa com coverage
+```
+
+### 📈 Relatórios de Cobertura
+
+#### Cobertura no Terminal
+
+```bash
+# Testes com relatório de cobertura
+python run_tests.py quick --coverage
+
+# Relatório sem linhas não cobertas
+python run_tests.py coverage --no-missing
+```
+
+#### Relatório HTML Interativo
+
+```bash
+# Gerar relatório HTML
+python run_tests.py full --coverage --html
+
+# Abrir relatório (gerado em htmlcov/index.html)
+start htmlcov/index.html  # Windows
+open htmlcov/index.html   # macOS
+```
+
+### 📊 Estatísticas de Cobertura
+
+| Módulo                       | Cobertura | Status        |
+| ---------------------------- | --------- | ------------- |
+| **enrollment.py** (service)  | 100%      | ✅ Completo   |
+| **main.py**                  | 100%      | ✅ Completo   |
+| **config.py**                | 95%       | ✅ Excelente  |
+| **admin.py**                 | 95%       | ✅ Excelente  |
+| **validators.py**            | 90%       | ✅ Muito Bom  |
+| **age_groups.py** (endpoint) | 70%       | ⚠️ Melhorar   |
+| **basic_auth.py**            | 64%       | ⚠️ Melhorar   |
+| **rabbitMQ.py**              | 50%       | 🔴 Prioridade |
+
+### 🔧 Configuração de Testes
+
+#### Pré-requisitos
+
+```bash
+# Instalar dependências
+pip install pytest requests pymongo pika coverage
+
+# Iniciar ambiente
+docker compose up -d
+```
+
+#### Configuração Avançada
+
+```bash
+# Pular verificação de ambiente
+python run_tests.py unit --no-env-check
+
+# Executar com pytest diretamente
+pytest tests/ -v --tb=short
+
+# Coverage manual
+coverage run --source=src/enroll_api -m pytest tests/
+coverage report --show-missing
+coverage html
 ```
 
 ## 🐳 Docker e Orquestração

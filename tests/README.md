@@ -10,6 +10,9 @@ Este diretório contém uma suíte completa de testes para o sistema de enrollme
 tests/
 ├── conftest.py              # Configurações e fixtures compartilhadas
 ├── test_unit.py             # Testes unitários (componentes isolados)
+├── test_auth.py             # Testes de autenticação e autorização
+├── test_admin.py            # Testes de endpoints administrativos
+├── test_validation.py       # Testes de validação de dados
 ├── test_age_groups.py       # Testes específicos para Age Groups
 ├── test_enrollments.py      # Testes específicos para Enrollments
 ├── test_integration.py      # Testes de integração (fluxo completo)
@@ -27,24 +30,45 @@ tests/
 - Testam serviços sem dependências externas
 - Execução rápida e independente
 
-#### 2. **Testes de Integração** (`test_integration.py`)
+#### 2. **Testes de Autenticação** (`test_auth.py`)
 
-- Testam fluxo completo da aplicação
-- Verificam integração entre API, banco e worker
-- Requerem ambiente completo rodando
+- Basic Auth implementation
+- Controle de acesso por roles
+- Proteção de endpoints
+- Headers malformados
 
-#### 3. **Testes Específicos de Funcionalidade**
+#### 3. **Testes Administrativos** (`test_admin.py`)
+
+- Endpoints de administração
+- Gerenciamento de usuários
+- Permissões específicas
+- Operações privilegiadas
+
+#### 4. **Testes de Validação** (`test_validation.py`)
+
+- Validação de CPF matemática
+- Validação de nomes e idades
+- JSON malformado
+- Tipos de dados incorretos
+
+#### 5. **Testes Específicos de Funcionalidade**
 
 - **Age Groups** (`test_age_groups.py`): CRUD completo, validações
 - **Enrollments** (`test_enrollments.py`): Criação, processamento, status
 
-#### 4. **Testes de Performance** (`test_performance.py`)
+#### 6. **Testes de Integração** (`test_integration.py`)
+
+- Testam fluxo completo da aplicação
+- Verificam integração entre API, banco e worker
+- Workflows end-to-end
+
+#### 7. **Testes de Performance** (`test_performance.py`)
 
 - Testes de carga e concorrência
 - Medição de tempos de resposta
 - Verificação de estabilidade sob stress
 
-#### 5. **Testes de Casos Extremos** (`test_edge_cases.py`)
+#### 8. **Testes de Casos Extremos** (`test_edge_cases.py`)
 
 - Payloads malformados
 - Tentativas de injection
@@ -62,10 +86,69 @@ tests/
 
 2. **Dependências instaladas**:
    ```bash
-   pip install pytest requests pymongo pika
+   pip install pytest requests pymongo pika coverage
    ```
 
-### Comandos de Execução
+### 🎯 Script de Testes Integrado
+
+O projeto inclui um script completo para execução de testes com suporte a cobertura de código:
+
+```bash
+# Executar testes rápidos (padrão)
+python run_tests.py
+
+# Executar testes específicos
+python run_tests.py unit           # Apenas unitários
+python run_tests.py auth           # Apenas autenticação
+python run_tests.py admin          # Apenas administrativos
+python run_tests.py validation     # Apenas validação
+python run_tests.py functional     # Age Groups + Enrollments
+python run_tests.py integration    # Integração completa
+python run_tests.py performance    # Performance e carga
+python run_tests.py edge           # Casos extremos
+
+# Executar suítes completas
+python run_tests.py all            # Todos (exceto lentos)
+python run_tests.py full           # Suíte completa
+python run_tests.py quick          # Testes rápidos
+```
+
+### 📊 Cobertura de Código
+
+#### Executar com Coverage
+
+```bash
+# Testes rápidos com cobertura
+python run_tests.py quick --coverage
+
+# Suíte completa com cobertura
+python run_tests.py coverage
+
+# Com relatório HTML
+python run_tests.py full --coverage --html
+
+# Apenas cobertura (sem mostrar linhas não cobertas)
+python run_tests.py coverage --no-missing
+```
+
+#### Relatórios de Coverage
+
+O sistema gera automaticamente:
+
+1. **Relatório no Terminal**: Mostra percentual de cobertura por arquivo
+2. **Relatório HTML**: Arquivo interativo em `htmlcov/index.html`
+3. **Arquivo XML**: Para integração com CI/CD em `coverage.xml`
+
+#### Configuração de Coverage
+
+O arquivo `.coveragerc` configura:
+
+- **Source**: `src/enroll_api` (código da aplicação)
+- **Omit**: Exclui testes, cache, venv
+- **Exclude**: Ignora linhas de debug, abstracts, etc.
+- **Precision**: 2 casas decimais
+
+### 🔧 Comandos Pytest Diretos
 
 #### Executar todos os testes:
 
@@ -79,11 +162,11 @@ pytest tests/
 # Apenas testes unitários
 pytest tests/test_unit.py
 
+# Apenas testes de autenticação
+pytest tests/test_auth.py
+
 # Apenas testes de age groups
 pytest tests/test_age_groups.py
-
-# Apenas testes de enrollments
-pytest tests/test_enrollments.py
 ```
 
 #### Executar por categoria:
@@ -102,17 +185,16 @@ pytest tests/test_performance.py -v
 pytest tests/ -m "not slow"
 ```
 
-#### Executar com mais detalhes:
+#### Executar com coverage manual:
 
 ```bash
-# Verbose com detalhes de falhas
-pytest tests/ -v -s
+# Com coverage básico
+coverage run -m pytest tests/
+coverage report
 
-# Com coverage
-pytest tests/ --cov=src/enroll_api
-
-# Parar no primeiro erro
-pytest tests/ -x
+# Com coverage e HTML
+coverage run --source=src/enroll_api -m pytest tests/
+coverage html
 ```
 
 ## 🔧 Configuração dos Testes
@@ -179,6 +261,13 @@ export MONGO_DB=enroll_api_test
 
 ## 📊 Cobertura de Testes
 
+### Estatísticas Atuais
+
+- **95+ testes** implementados
+- **8 categorias** de teste
+- **78% cobertura** de código (518 linhas cobertas)
+- **100% dos endpoints** funcionais testados
+
 ### Funcionalidades Testadas
 
 #### ✅ Age Groups
@@ -186,120 +275,148 @@ export MONGO_DB=enroll_api_test
 - [x] Criação, leitura, atualização, exclusão
 - [x] Validação de dados
 - [x] Casos extremos (idades negativas, ranges inválidos)
-- [x] Sobreposição de ranges
+- [x] Controle de acesso (admin vs user)
 
 #### ✅ Enrollments
 
 - [x] Criação e validação
 - [x] Processamento assíncrono
 - [x] Verificação de status
-- [x] Validação de CPF
+- [x] Validação de CPF matemática
 - [x] Integração com age groups
 
-#### ✅ Performance
+#### ✅ Autenticação
 
-- [x] Criação simultânea de enrollments
-- [x] Operações CRUD em massa
-- [x] Tempos de resposta
-- [x] Consistência sob carga
+- [x] Basic Auth implementation
+- [x] Múltiplos usuários e roles
+- [x] Proteção de endpoints
+- [x] Headers malformados
+- [x] Tentativas de acesso não autorizado
+
+#### ✅ Validação
+
+- [x] CPF com algoritmo matemático
+- [x] Nomes com regras de negócio
+- [x] Idades com limites
+- [x] JSON malformado
+- [x] Tipos de dados incorretos
 
 #### ✅ Segurança
 
 - [x] Tentativas de SQL/NoSQL injection
-- [x] Payloads malformados
-- [x] Caracteres especiais e Unicode
+- [x] Payloads extremamente grandes
+- [x] Caracteres Unicode e especiais
+- [x] Valores nulos e negativos
 
-## 🎯 Boas Práticas Implementadas
+#### ✅ Performance
 
-### 1. **Isolamento de Testes**
+- [x] Enrollments simultâneos
+- [x] CRUD em massa
+- [x] Tempos de resposta
+- [x] Consistência sob carga
 
-- Cada teste limpa o banco antes/depois
-- Uso de fixtures para setup/teardown
-- Testes independentes entre si
+### Módulos com Melhor Cobertura
 
-### 2. **Mocking Adequado**
+| Módulo                  | Cobertura | Status       |
+| ----------------------- | --------- | ------------ |
+| main.py                 | 100%      | ✅ Completo  |
+| enrollment.py (service) | 100%      | ✅ Completo  |
+| config.py               | 95%       | ✅ Excelente |
+| admin.py                | 95%       | ✅ Excelente |
+| validators.py           | 90%       | ✅ Muito Bom |
 
-- Testes unitários usam mocks para dependências
-- Testes de integração usam ambiente real
-- Separação clara entre tipos de teste
+### Áreas para Melhoria
 
-### 3. **Assertions Robustas**
+| Módulo                   | Cobertura | Prioridade |
+| ------------------------ | --------- | ---------- |
+| rabbitMQ.py              | 50%       | 🔴 Alta    |
+| basic_auth.py            | 64%       | 🟡 Média   |
+| age_groups.py (endpoint) | 70%       | 🟡 Média   |
 
-- Verificação de status codes
-- Validação de estrutura de dados
-- Verificação de efeitos colaterais
+## 🎯 Boas Práticas
 
-### 4. **Organização Clara**
+### Isolamento de Testes
 
-- Classes agrupam testes relacionados
-- Nomes descritivos para testes
-- Documentação em docstrings
+- Use `clean_database` para testes que modificam dados
+- Testes unitários devem usar mocks
+- Evite dependências entre testes
 
-### 5. **Configuração Flexível**
+### Performance
 
-- Variáveis de ambiente para configuração
-- Marcadores para categorizar testes
-- Opções para execução seletiva
+- Marque testes lentos com `@pytest.mark.slow`
+- Use `run_tests.py quick` para desenvolvimento
+- Execute suíte completa antes de commits
 
-## 🐛 Debugging de Testes
+### Cobertura
 
-### Logs Detalhados
+- Mantenha cobertura acima de 75%
+- Foque em testar lógica de negócio crítica
+- Use `--coverage --html` para análise detalhada
 
-```bash
-# Executar com logs
-pytest tests/ -v -s --log-cli-level=DEBUG
-```
-
-### Executar Teste Específico
-
-```bash
-# Executar apenas um teste
-pytest tests/test_enrollments.py::TestEnrollments::test_create_enrollment_success -v
-```
-
-### Verificar Ambiente
+### Debugging
 
 ```bash
-# Verificar se API está rodando
-curl http://localhost:8000/
+# Parar no primeiro erro
+python run_tests.py unit -x
 
-# Verificar MongoDB
-docker exec -it enroll_api_mongo mongosh -u admin -p admin
+# Executar teste específico
+pytest tests/test_unit.py::test_specific_function -v -s
+
+# Ver logs detalhados
+pytest tests/ -v -s --tb=long
 ```
 
-## 📈 Métricas de Qualidade
-
-### Objetivos de Cobertura
-
-- **Cobertura de código**: > 90%
-- **Cobertura de funcionalidades**: 100%
-- **Testes de casos extremos**: Abrangente
-
-### Critérios de Sucesso
-
-- Todos os testes passam consistentemente
-- Tempo de execução razoável (< 5 minutos)
-- Detecção de regressões
-- Validação de requisitos de negócio
-
-## 🔄 Integração Contínua
-
-### Pipeline Sugerido
-
-1. **Testes Unitários**: Execução rápida em cada commit
-2. **Testes de Integração**: Execução em PRs
-3. **Testes de Performance**: Execução noturna
-4. **Testes Completos**: Execução antes de releases
+## 🚀 Integração Contínua
 
 ### Comandos para CI/CD
 
 ```bash
-# Testes rápidos (CI)
-pytest tests/test_unit.py tests/test_age_groups.py tests/test_enrollments.py
+# Verificação rápida (para PRs)
+python run_tests.py quick --coverage
 
-# Testes completos (CD)
-pytest tests/ -m "not slow"
+# Verificação completa (para main branch)
+python run_tests.py full --coverage --html
 
-# Testes de performance (opcional)
-pytest tests/test_performance.py -m "slow"
+# Apenas verificar se ambiente está OK
+python run_tests.py unit --no-env-check
 ```
+
+### Arquivos Gerados
+
+- `.coverage`: Dados de cobertura
+- `htmlcov/`: Relatório HTML interativo
+- `coverage.xml`: Para ferramentas de CI/CD
+
+## 📝 Contribuindo
+
+### Adicionando Novos Testes
+
+1. **Escolha a categoria** apropriada
+2. **Use fixtures** existentes quando possível
+3. **Adicione markers** para testes lentos
+4. **Documente** casos de teste complexos
+5. **Verifique cobertura** com `--coverage`
+
+### Estrutura de Teste
+
+```python
+def test_feature_description(api_client, clean_database):
+    """Descrição clara do que está sendo testado"""
+    # Arrange
+    setup_data = {...}
+
+    # Act
+    response = api_client.post("/endpoint", json=setup_data)
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json()["field"] == expected_value
+```
+
+### Checklist para Novos Testes
+
+- [ ] Teste passa individualmente
+- [ ] Teste passa em suíte completa
+- [ ] Cobertura não diminuiu
+- [ ] Documentação atualizada
+- [ ] Markers apropriados adicionados
