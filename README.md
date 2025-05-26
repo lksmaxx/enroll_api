@@ -152,8 +152,8 @@ Este projeto implementa um **sistema de enrollment** robusto que permite:
 
 ```bash
 # 1. Clone o repositório
-git clone <repository-url>
-cd enrollment-api
+git clone https://github.com/lksmaxx/enroll_api.git
+cd enroll_api
 
 # 2. Setup automático (instala dependências + inicia Docker)
 make setup
@@ -628,6 +628,28 @@ docker exec -it enroll_api_mongo mongosh
 - **API Docs**: http://localhost:8000/docs (Swagger)
 - **Autenticação**: [docs/AUTHENTICATION.md](docs/AUTHENTICATION.md)
 - **Testes**: [tests/README.md](tests/README.md)
+
+## 👨‍💻 Autor
+
+**Lucas Maximino Torres**
+
+- 📧 Email: [lucasmaximinotorres@gmail.com](mailto:lucasmaximinotorres@gmail.com)
+- 🐙 GitHub: [@lksmaxx](https://github.com/lksmaxx)
+- 📂 Repositório: [enroll_api](https://github.com/lksmaxx/enroll_api)
+
+### 🤝 Contribuições
+
+Contribuições são bem-vindas! Sinta-se à vontade para:
+
+1. **Fazer fork** do projeto
+2. **Criar uma branch** para sua feature (`git checkout -b feature/nova-feature`)
+3. **Commit** suas mudanças (`git commit -m 'Adiciona nova feature'`)
+4. **Push** para a branch (`git push origin feature/nova-feature`)
+5. **Abrir um Pull Request**
+
+### 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
