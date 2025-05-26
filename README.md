@@ -386,15 +386,16 @@ Final User             │          │          │          │
 
 ### 📊 Cobertura de Testes
 
-O projeto possui uma suíte completa de **95+ testes** com **78% de cobertura de código**:
+O projeto possui uma suíte completa de **107 testes** com **83.59% de cobertura de código**:
 
 - **✅ Testes Unitários**: Modelos e serviços isolados (14 testes)
 - **✅ Testes de Autenticação**: Basic Auth e permissões (13 testes)
 - **✅ Testes Administrativos**: Endpoints admin (15 testes)
 - **✅ Testes de Validação**: CPF, nomes, idades (12 testes)
-- **✅ Testes Funcionais**: Age Groups e Enrollments (26 testes)
-- **✅ Testes de Integração**: Fluxo completo (10 testes)
-- **✅ Testes de Performance**: Carga e concorrência (7 testes)
+- **✅ Testes de Age Groups**: CRUD e validações (10 testes)
+- **✅ Testes de Enrollments**: Fluxo completo (13 testes)
+- **✅ Testes de Integração**: Workflows end-to-end (10 testes)
+- **✅ Testes de Performance**: Carga e concorrência (6 testes)
 - **✅ Testes de Casos Extremos**: Segurança e robustez (14 testes)
 
 ### 🎯 Execução de Testes
@@ -455,16 +456,21 @@ open htmlcov/index.html   # macOS
 
 ### 📊 Estatísticas de Cobertura
 
-| Módulo                       | Cobertura | Status        |
-| ---------------------------- | --------- | ------------- |
-| **enrollment.py** (service)  | 100%      | ✅ Completo   |
-| **main.py**                  | 100%      | ✅ Completo   |
-| **config.py**                | 95%       | ✅ Excelente  |
-| **admin.py**                 | 95%       | ✅ Excelente  |
-| **validators.py**            | 90%       | ✅ Muito Bom  |
-| **age_groups.py** (endpoint) | 70%       | ⚠️ Melhorar   |
-| **basic_auth.py**            | 64%       | ⚠️ Melhorar   |
-| **rabbitMQ.py**              | 50%       | 🔴 Prioridade |
+| Módulo                       | Cobertura | Status       |
+| ---------------------------- | --------- | ------------ |
+| **enrollment.py** (service)  | 100%      | ✅ Completo  |
+| **enrollment.py** (endpoint) | 100%      | ✅ Completo  |
+| **main.py**                  | 100%      | ✅ Completo  |
+| **config.py**                | 95%       | ✅ Excelente |
+| **admin.py**                 | 94.74%    | ✅ Excelente |
+| **enrollment.py** (model)    | 92.86%    | ✅ Muito Bom |
+| **validators.py**            | 90.38%    | ✅ Muito Bom |
+| **age_group.py** (model)     | 87.76%    | ✅ Muito Bom |
+| **mongo.py**                 | 87.10%    | ✅ Muito Bom |
+| **age_groups.py** (endpoint) | 83.33%    | ✅ Bom       |
+| **age_groups.py** (service)  | 80.65%    | ✅ Bom       |
+| **rabbitMQ.py**              | 82.35%    | ✅ Bom       |
+| **basic_auth.py**            | 64.41%    | ⚠️ Melhorar  |
 
 ### 🔧 Configuração de Testes
 
