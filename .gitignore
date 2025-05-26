@@ -31,7 +31,6 @@ archive.zip
 .venv
 
 # Arquivos temporários de desenvolvimento
-test_*.py
 check_*.py
 debug_*.py
 temp_*.py
